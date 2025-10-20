@@ -1,4 +1,4 @@
-name: Build MCLauncher
+name: Build MCLauncher (Full with WUTokenHelper)
 
 on:
   workflow_dispatch:
@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install Visual C++ Build Tools (for midl.exe)
+        run: |
+          choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041" --yes
+        shell: powershell
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
