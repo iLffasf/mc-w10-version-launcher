@@ -1,4 +1,4 @@
-name: Build MCLauncher (Full with WUTokenHelper)
+name: Build MCLauncher
 
 on:
   workflow_dispatch:
@@ -13,10 +13,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Visual C++ Build Tools (for midl.exe)
+      - name: Install VC++ and MIDL (Windows 10 SDK)
         run: |
-          choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041" --yes
+          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.ATL --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041" --yes
+          echo "##[group]Searching for midl.exe"
+          Get-ChildItem "C:\Program Files (x86)" -Recurse -Filter midl.exe -ErrorAction SilentlyContinue | Select-Object -First 5 | ForEach-Object { $_.FullName }
+          echo "##[endgroup]"
         shell: powershell
+
+      - name: Add MIDL to PATH (if found in common location)
+        run: |
+          $midlPath = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"
+          if (Test-Path $midlPath) { echo "$midlPath" | Out-File -FilePath $env:GITHUB_PATH -Append }
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
