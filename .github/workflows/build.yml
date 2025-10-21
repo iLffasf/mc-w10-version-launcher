@@ -32,7 +32,14 @@ jobs:
       - name: Create ZIP package
         run: |
           mkdir output
-          Copy-Item -Path "MCLauncher/bin/x64/Release/*" -Destination "output" -Recurse
+          if (Test-Path "MCLauncher/bin/x64/Release") {
+            Copy-Item -Path "MCLauncher/bin/x64/Release/*" -Destination "output" -Recurse
+          } elseif (Test-Path "MCLauncher/bin/Release") {
+            Copy-Item -Path "MCLauncher/bin/Release/*" -Destination "output" -Recurse
+          } else {
+            Write-Host "⚠️ No build output found!"
+            exit 1
+          }
           Compress-Archive -Path output/* -DestinationPath MCLauncher.zip
 
       - name: Upload Artifact
