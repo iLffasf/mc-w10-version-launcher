@@ -35,8 +35,8 @@ jobs:
       - name: Restore NuGet packages
         run: nuget restore MCLauncher.sln
 
-      - name: Build solution (Release, x64)
-        run: msbuild MCLauncher.sln /p:Configuration=Release /p:Platform=x64
+      - name: Build C# project only (Release, x64)
+        run: msbuild MCLauncher/MCLauncher.csproj /p:Configuration=Release /p:Platform=x64
 
       - name: Create ZIP package
         run: |
