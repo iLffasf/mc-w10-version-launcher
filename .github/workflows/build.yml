@@ -13,38 +13,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install .NET Framework 4.6.1 targeting pack
-        run: choco install netfx-4.6.1-devpack -y
+      - name: Install .NET Framework 4.6.1 Developer Pack
+        run: |
+          choco install netfx-4.6.1-devpack -y
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
-
       - name: Restore NuGet packages
         run: nuget restore MCLauncher.sln
 
-      - name: Build C# project only (Release, x64)
-        run: msbuild MCLauncher/MCLauncher.csproj /p:Configuration=Release /p:Platform=x64 /verbosity:minimal
+      - name: Build MCLauncher only
+        run: msbuild MCLauncher/MCLauncher.csproj /p:Configuration=Release /p:Platform=x64
 
-      - name: List all files after build (diagnostic)
-        run: |
-          Write-Host "📂 Directory listing after build:"
-          Get-ChildItem -Recurse | ForEach-Object { $_.FullName }
+      - name: Check build output
+        run: dir MCLauncher\x64\Release
 
-      - name: Create ZIP package (if build output found)
+      - name: Create ZIP package
         run: |
           mkdir output
-          if (Test-Path "MCLauncher/bin/x64/Release") {
-            Copy-Item -Path "MCLauncher/bin/x64/Release/*" -Destination "output" -Recurse
-          } elseif (Test-Path "MCLauncher/bin/Release") {
-            Copy-Item -Path "MCLauncher/bin/Release/*" -Destination "output" -Recurse
-          } else {
-            Write-Host "⚠️ No build output found!"
-            exit 1
-          }
-          Compress-Archive -Path output/* -DestinationPath MCLauncher.zip
+          Copy-Item -Path "MCLauncher\x64\Release\*" -Destination "output" -Recurse
+          Compress-Archive -Path output\* -DestinationPath MCLauncher.zip
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
