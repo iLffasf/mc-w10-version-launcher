@@ -13,18 +13,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install VC++ and MIDL (Windows 10 SDK)
+      - name: Install .NET Framework 4.6.1 targeting pack
         run: |
-          choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.ATL --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041" --yes
-          echo "##[group]Searching for midl.exe"
-          Get-ChildItem "C:\Program Files (x86)" -Recurse -Filter midl.exe -ErrorAction SilentlyContinue | Select-Object -First 5 | ForEach-Object { $_.FullName }
-          echo "##[endgroup]"
-        shell: powershell
-
-      - name: Add MIDL to PATH (if found in common location)
-        run: |
-          $midlPath = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64"
-          if (Test-Path $midlPath) { echo "$midlPath" | Out-File -FilePath $env:GITHUB_PATH -Append }
+          choco install netfx-4.6.1-devpack -y
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -41,7 +32,7 @@ jobs:
       - name: Create ZIP package
         run: |
           mkdir output
-          Copy-Item -Path "x64/Release/*" -Destination "output" -Recurse
+          Copy-Item -Path "MCLauncher/bin/x64/Release/*" -Destination "output" -Recurse
           Compress-Archive -Path output/* -DestinationPath MCLauncher.zip
 
       - name: Upload Artifact
